@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Código Gerado</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1208;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #2b1b0e;
+      padding: 32px;
+      border-radius: 18px;
+    }
+
+    .code {
+      font-size: 72px;
+      letter-spacing: 10px;
+      color: #f4c16d;
+      font-weight: bold;
+      margin: 24px 0;
+    }
+
+    a {
+      color: #f4c16d;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>Código gerado!</h1>
+
+    <p>Digite este código na TV:</p>
+
+    <div class="code">{{ attempt.code }}</div>
+
+    <p>Boa sorte, {{ attempt.player.name }}!</p>
+
+    <a href="{% url 'event_register' event.slug %}">Gerar outro código</a>
+  </div>
+</body>
+</html>

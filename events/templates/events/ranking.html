@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ranking | {{ event.name }}</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1208;
+      color: white;
+      padding: 30px;
+    }
+
+    h1, h2 {
+      text-align: center;
+    }
+
+    h1 {
+      color: #f4c16d;
+    }
+
+    table {
+      width: 100%;
+      max-width: 900px;
+      margin: 30px auto;
+      border-collapse: collapse;
+      background: #2b1b0e;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      text-align: left;
+    }
+
+    th {
+      background: #f4c16d;
+      color: #211307;
+    }
+
+    .pos {
+      font-weight: bold;
+      color: #f4c16d;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>{{ event.brand.name }}</h1>
+  <h2>Ranking — {{ event.name }}</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Posição</th>
+        <th>Jogador</th>
+        <th>Bairro</th>
+        <th>Score</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for attempt in attempts %}
+      <tr>
+        <td class="pos">#{{ forloop.counter }}</td>
+        <td>{{ attempt.player.name }}</td>
+        <td>{{ attempt.player.neighborhood }}</td>
+        <td>{{ attempt.score }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="4">Nenhuma pontuação registrada ainda.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</body>
+</html>

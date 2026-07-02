@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ event.name }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1208;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: #2b1b0e;
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.35);
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 5px;
+      color: #f4c16d;
+    }
+
+    h2 {
+      font-size: 18px;
+      color: #d7b98c;
+      margin-top: 0;
+    }
+
+    input, button {
+      width: 100%;
+      padding: 15px;
+      margin-top: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #f4c16d;
+      color: #211307;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .small {
+      margin-top: 14px;
+      font-size: 14px;
+      color: #c9b7a2;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>{{ event.brand.name }}</h1>
+    <h2>{{ event.name }}</h2>
+
+    <form method="post">
+      {% csrf_token %}
+
+      <input type="text" name="name" placeholder="Nome" required>
+      <input type="text" name="phone" placeholder="Telefone" required>
+      <input type="text" name="neighborhood" placeholder="Bairro" required>
+
+      <button type="submit">GERAR CÓDIGO</button>
+    </form>
+
+    <div class="small">
+      Participe do desafio e concorra aos brindes da ação.
+    </div>
+  </div>
+</body>
+</html>

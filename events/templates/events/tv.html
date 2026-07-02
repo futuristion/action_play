@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>TV | {{ event.name }}</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #4a2b12, #100904);
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .screen {
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      min-height: 100vh;
+    }
+
+    .presentation {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .presentation h1 {
+      font-size: 58px;
+      color: #f4c16d;
+      margin-bottom: 10px;
+    }
+
+    .presentation h2 {
+      font-size: 32px;
+      margin-top: 0;
+    }
+
+    .presentation p {
+      font-size: 24px;
+      color: #e6d2b4;
+      max-width: 700px;
+    }
+
+    .side {
+      background: rgba(0,0,0,.35);
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      border-left: 1px solid rgba(255,255,255,.08);
+    }
+
+    .code-display {
+      height: 60px;
+      background: #130b05;
+      border-radius: 12px;
+      font-size: 38px;
+      letter-spacing: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      color: #f4c16d;
+    }
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    button {
+      height: 70px;
+      border: none;
+      border-radius: 12px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      background: #3a2717;
+      color: white;
+    }
+
+    button:hover {
+      background: #f4c16d;
+      color: #211307;
+    }
+
+    .message {
+      margin-top: 18px;
+      min-height: 30px;
+      color: #f4c16d;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    .game-area {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    .game-area h1 {
+      font-size: 56px;
+      color: #f4c16d;
+    }
+
+    .score {
+      font-size: 52px;
+      color: #f4c16d;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="screen" id="waitScreen">
+    <div class="presentation">
+      <h1>{{ event.brand.name }}</h1>
+      <h2>Grão Mestre</h2>
+      <p>Escaneie o QR Code, gere seu código e participe do desafio.</p>
+      <p>Ranking ao vivo • Brindes • Café moído na hora</p>
+    </div>
+
+    <div class="side">
+      <h2>Digite seu código</h2>
+
+      <div class="code-display" id="codeDisplay">----</div>
+
+      <div class="keyboard">
+        <button onclick="addNumber('1')">1</button>
+        <button onclick="addNumber('2')">2</button>
+        <button onclick="addNumber('3')">3</button>
+
+        <button onclick="addNumber('4')">4</button>
+        <button onclick="addNumber('5')">5</button>
+        <button onclick="addNumber('6')">6</button>
+
+        <button onclick="addNumber('7')">7</button>
+        <button onclick="addNumber('8')">8</button>
+        <button onclick="addNumber('9')">9</button>
+
+        <button onclick="backspace()">←</button>
+        <button onclick="addNumber('0')">0</button>
+        <button onclick="validateCode()">OK</button>
+      </div>
+
+      <div class="message" id="message"></div>
+    </div>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <h1 id="playerName">Jogador</h1>
+    <p>Gameplay simulada — MVP 01</p>
+    <div class="score" id="score">0</div>
+    <button onclick="finishGame()">Finalizar Jogada</button>
+  </div>
+
+  <script>
+    let code = "";
+    let attemptId = null;
+    let score = 0;
+    let scoreInterval = null;
+
+    function updateDisplay() {
+      document.getElementById("codeDisplay").innerText = code.padEnd(4, "-");
+    }
+
+    function addNumber(num) {
+      if (code.length < 4) {
+        code += num;
+        updateDisplay();
+      }
+    }
+
+    function backspace() {
+      code = code.slice(0, -1);
+      updateDisplay();
+    }
+
+    async function validateCode() {
+      if (code.length !== 4) {
+        document.getElementById("message").innerText = "Digite os 4 números.";
+        return;
+      }
+
+      const response = await fetch("/api/e/{{ event.slug }}/validate-code/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ code: code })
+      });
+
+      const data = await response.json();
+
+      if (data.ok) {
+        attemptId = data.attempt_id;
+        startGame(data.player_name);
+      } else {
+        document.getElementById("message").innerText = data.error;
+        code = "";
+        updateDisplay();
+      }
+    }
+
+    function startGame(name) {
+      document.getElementById("waitScreen").style.display = "none";
+      document.getElementById("gameArea").style.display = "flex";
+      document.getElementById("playerName").innerText = "Bem-vindo, " + name;
+
+      score = 0;
+      document.getElementById("score").innerText = score;
+
+      scoreInterval = setInterval(() => {
+        score += Math.floor(Math.random() * 80) + 20;
+        document.getElementById("score").innerText = score;
+      }, 400);
+    }
+
+    async function finishGame() {
+      clearInterval(scoreInterval);
+
+      await fetch("/api/e/{{ event.slug }}/save-score/", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          attempt_id: attemptId,
+          score: score
+        })
+      });
+
+      attemptId = null;
+      code = "";
+      updateDisplay();
+
+      document.getElementById("gameArea").style.display = "none";
+      document.getElementById("waitScreen").style.display = "grid";
+      document.getElementById("message").innerText = "Pontuação salva!";
+    }
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key >= "0" && event.key <= "9") addNumber(event.key);
+      if (event.key === "Backspace") backspace();
+      if (event.key === "Enter") validateCode();
+    });
+  </script>
+
+</body>
+</html>
