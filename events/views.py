@@ -136,3 +136,51 @@ def code_screen(request, event_slug, attempt_id):
         "event": event,
         "attempt": attempt,
     })
+
+
+def operator_panel(request, event_slug):
+    event = get_object_or_404(Event, slug=event_slug, active=True)
+
+    query = request.GET.get("q", "")
+
+    players = Player.objects.all().order_by("-created_at")
+
+    if query:
+        players = players.filter(
+            name__icontains=query
+        ) | players.filter(
+            phone__icontains=query
+        )
+
+    players = players[:30]
+
+    return render(request, "events/operator.html", {
+        "event": event,
+        "players": players,
+        "query": query,
+    })
+
+
+def release_attempt(request, event_slug, player_id):
+    event = get_object_or_404(Event, slug=event_slug, active=True)
+    player = get_object_or_404(Player, id=player_id)
+    game = Game.objects.filter(active=True).first()
+
+    if request.method == "POST":
+        pin = request.POST.get("pin")
+
+        if pin != event.promoter_pin:
+            return redirect("operator_panel", event_slug=event.slug)
+
+        attempt = Attempt.objects.create(
+            event=event,
+            player=player,
+            game=game,
+            code=generate_code(),
+            reason="instagram",
+            released_by_promoter=True,
+        )
+
+        return redirect("code_screen", event_slug=event.slug, attempt_id=attempt.id)
+
+    return redirect("operator_panel", event_slug=event.slug)

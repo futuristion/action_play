@@ -10,5 +10,8 @@ urlpatterns = [
 
     path("api/e/<slug:event_slug>/validate-code/", views.validate_code, name="validate_code"),
     path("api/e/<slug:event_slug>/save-score/", views.save_score, name="save_score"),
+
+    path("e/<slug:event_slug>/operator/", views.operator_panel, name="operator_panel"),
+    path("e/<slug:event_slug>/operator/release/<int:player_id>/", views.release_attempt, name="release_attempt"),
     
 ]

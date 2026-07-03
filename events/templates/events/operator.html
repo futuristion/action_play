@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Operador | {{ event.name }}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #1b1208;
+      color: white;
+      padding: 18px;
+    }
+
+    h1 {
+      color: #f4c16d;
+      margin-bottom: 4px;
+    }
+
+    .search {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+    }
+
+    input, button {
+      padding: 13px;
+      border-radius: 10px;
+      border: none;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    input {
+      width: 100%;
+    }
+
+    button {
+      background: #f4c16d;
+      color: #211307;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .player {
+      background: #2b1b0e;
+      padding: 16px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+    }
+
+    .player h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .muted {
+      color: #d7b98c;
+      font-size: 14px;
+    }
+
+    .release-form {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1.4fr;
+      gap: 8px;
+    }
+
+    .links {
+      margin-top: 18px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    a {
+      color: #f4c16d;
+      text-decoration: none;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Painel Operador</h1>
+  <div class="muted">{{ event.name }}</div>
+
+  <form class="search" method="get">
+    <input type="text" name="q" value="{{ query }}" placeholder="Buscar por nome ou telefone">
+    <button type="submit">Buscar</button>
+  </form>
+
+  <div class="links">
+    <a href="{% url 'event_register' event.slug %}">Cadastrar jogador</a>
+    <a href="{% url 'ranking' event.slug %}">Ver ranking</a>
+    <a href="{% url 'tv_screen' event.slug %}">Tela TV</a>
+  </div>
+
+  <hr>
+
+  {% for player in players %}
+    <div class="player">
+      <h2>{{ player.name }}</h2>
+      <div class="muted">Telefone: {{ player.phone }}</div>
+      <div class="muted">Bairro: {{ player.neighborhood }}</div>
+
+      <form class="release-form" method="post" action="{% url 'release_attempt' event.slug player.id %}">
+        {% csrf_token %}
+        <input type="password" name="pin" placeholder="PIN">
+        <button type="submit">Liberar Instagram</button>
+      </form>
+    </div>
+  {% empty %}
+    <p>Nenhum participante encontrado.</p>
+  {% endfor %}
+</body>
+</html>
