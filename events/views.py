@@ -29,10 +29,7 @@ def event_register(request, event_slug):
             reason="initial",
         )
 
-        return render(request, "events/code.html", {
-            "event": event,
-            "attempt": attempt,
-        })
+        return redirect("code_screen", event_slug=event.slug, attempt_id=attempt.id)
 
     return render(request, "events/register.html", {
         "event": event,
@@ -124,3 +121,18 @@ def save_score(request, event_slug):
             "ok": False,
             "error": "Tentativa não encontrada.",
         })
+    
+
+def code_screen(request, event_slug, attempt_id):
+    event = get_object_or_404(Event, slug=event_slug, active=True)
+
+    attempt = get_object_or_404(
+        Attempt,
+        id=attempt_id,
+        event=event,
+    )
+
+    return render(request, "events/code.html", {
+        "event": event,
+        "attempt": attempt,
+    })
