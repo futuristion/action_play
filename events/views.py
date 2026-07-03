@@ -5,6 +5,9 @@ from games.models import Game, Attempt, generate_code
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
+import qrcode
+import base64
+from io import BytesIO
 
 
 def event_register(request, event_slug):
@@ -39,8 +42,20 @@ def event_register(request, event_slug):
 def tv_screen(request, event_slug):
     event = get_object_or_404(Event, slug=event_slug, active=True)
 
+    register_url = request.build_absolute_uri(
+        f"/e/{event.slug}/"
+    )
+
+    qr = qrcode.make(register_url)
+    buffer = BytesIO()
+    qr.save(buffer, format="PNG")
+
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode()
+
     return render(request, "events/tv.html", {
         "event": event,
+        "register_url": register_url,
+        "qr_base64": qr_base64,
     })
 
 

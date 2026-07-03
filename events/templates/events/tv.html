@@ -118,6 +118,59 @@
       font-weight: bold;
       margin: 20px 0;
     }
+
+    .qr-box {
+  background: white;
+  padding: 18px;
+  border-radius: 18px;
+  margin: 20px 0;
+  box-shadow: 0 20px 40px rgba(0,0,0,.35);
+}
+
+.qr-box img {
+  width: 230px;
+  height: 230px;
+  display: block;
+}
+
+.call {
+  font-size: 30px !important;
+  color: #f4c16d !important;
+  font-weight: bold;
+  margin: 10px 0;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+  max-width: 620px;
+}
+
+.steps div {
+  background: rgba(0,0,0,.25);
+  padding: 14px;
+  border-radius: 12px;
+  color: #f1dcc0;
+  font-size: 20px;
+}
+
+.link {
+  font-size: 18px !important;
+  color: #d7b98c !important;
+  margin-top: 22px;
+}
+
+.fullscreen-btn {
+  margin-top: 12px;
+  width: 220px;
+  height: 48px;
+  font-size: 18px;
+  background: transparent;
+  border: 1px solid #f4c16d;
+  color: #f4c16d;
+}
   </style>
 </head>
 
@@ -125,11 +178,26 @@
 
   <div class="screen" id="waitScreen">
     <div class="presentation">
-      <h1>{{ event.brand.name }}</h1>
-      <h2>Grão Mestre</h2>
-      <p>Escaneie o QR Code, gere seu código e participe do desafio.</p>
-      <p>Ranking ao vivo • Brindes • Café moído na hora</p>
-    </div>
+  <h1>{{ event.brand.name }}</h1>
+  <h2>Grão Mestre</h2>
+
+  <div class="qr-box">
+    <img src="data:image/png;base64,{{ qr_base64 }}" alt="QR Code">
+  </div>
+
+  <p class="call">Escaneie o QR Code para participar</p>
+
+  <div class="steps">
+    <div>1. Cadastre-se</div>
+    <div>2. Receba o código</div>
+    <div>3. Digite na TV</div>
+    <div>4. Jogue e entre no ranking</div>
+  </div>
+
+  <p class="link">{{ register_url }}</p>
+
+  <button class="fullscreen-btn" onclick="goFullscreen()">Tela cheia</button>
+</div>
 
     <div class="side">
       <h2>Digite seu código</h2>
@@ -251,6 +319,18 @@
       if (event.key === "Backspace") backspace();
       if (event.key === "Enter") validateCode();
     });
+
+    function goFullscreen() {
+  const elem = document.documentElement;
+
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen();
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen();
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen();
+  }
+}
   </script>
 
 </body>
