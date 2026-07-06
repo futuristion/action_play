@@ -13,5 +13,5 @@ urlpatterns = [
 
     path("e/<slug:event_slug>/operator/", views.operator_panel, name="operator_panel"),
     path("e/<slug:event_slug>/operator/release/<int:player_id>/", views.release_attempt, name="release_attempt"),
-    
+    path("api/e/<slug:event_slug>/ranking-json/", views.ranking_json, name="ranking_json"),
 ]

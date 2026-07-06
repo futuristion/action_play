@@ -184,3 +184,25 @@ def release_attempt(request, event_slug, player_id):
         return redirect("code_screen", event_slug=event.slug, attempt_id=attempt.id)
 
     return redirect("operator_panel", event_slug=event.slug)
+
+def ranking_json(request, event_slug):
+    event = get_object_or_404(Event, slug=event_slug, active=True)
+
+    attempts = Attempt.objects.filter(
+        event=event,
+        status="finished",
+    ).order_by("-score")[:5]
+
+    data = []
+
+    for attempt in attempts:
+        data.append({
+            "player": attempt.player.name,
+            "neighborhood": attempt.player.neighborhood,
+            "score": attempt.score,
+        })
+
+    return JsonResponse({
+        "ok": True,
+        "ranking": data,
+    })

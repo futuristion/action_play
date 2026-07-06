@@ -171,6 +171,72 @@
   border: 1px solid #f4c16d;
   color: #f4c16d;
 }
+
+.result-area {
+  display: none;
+  height: 100vh;
+  overflow: hidden;
+  box-sizing: border-box;
+  padding: 18px 40px;
+  background: radial-gradient(circle at top, #4a2b12, #100904);
+  color: white;
+  font-family: Arial, sans-serif;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+}
+
+.result-area h1 {
+  font-size: 46px;
+  margin: 0 0 4px;
+}
+
+#resultPlayer {
+  font-size: 22px;
+  margin: 4px 0;
+}
+
+.final-score {
+  font-size: 50px;
+  margin: 4px 0;
+}
+
+.result-area h2 {
+  font-size: 28px;
+  margin: 6px 0;
+}
+
+.ranking-list {
+  max-width: 720px;
+  margin-top: 6px;
+}
+
+.ranking-item {
+  display: grid;
+  grid-template-columns: 60px 1fr 120px;
+  gap: 12px;
+  background: rgba(0,0,0,.28);
+  border-radius: 14px;
+  padding: 9px 16px;
+  margin-bottom: 7px;
+  font-size: 20px;
+  align-items: center;
+}
+
+.ranking-item .score {
+  font-size: 23px;
+}
+
+.instagram-call {
+  margin-top: 10px;
+  font-size: 20px;
+}
+
+.return-msg {
+  font-size: 16px;
+  margin-top: 6px;
+}
   </style>
 </head>
 
@@ -226,6 +292,26 @@
     </div>
   </div>
 
+  <div class="result-area" id="resultArea">
+  <h1>Parabéns!</h1>
+
+  <p id="resultPlayer">Jogador</p>
+
+  <div class="final-score" id="finalScore">0</div>
+
+  <h2>Top 5 Ranking</h2>
+
+  <div class="ranking-list" id="rankingList"></div>
+
+  <p class="instagram-call">
+    Quer tentar novamente? Siga {{ event.brand.instagram }} e fale com o promotor.
+  </p>
+
+  <p class="return-msg">
+    Voltando para a tela de código em <span id="countdown">10</span>s...
+  </p>
+</div>
+
   <div class="game-area" id="gameArea">
     <h1 id="playerName">Jogador</h1>
     <p>Gameplay simulada — MVP 01</p>
@@ -238,6 +324,8 @@
     let attemptId = null;
     let score = 0;
     let scoreInterval = null;
+    let currentPlayerName = "";
+    
 
     function updateDisplay() {
       document.getElementById("codeDisplay").innerText = code.padEnd(4, "-");
@@ -280,6 +368,8 @@
     }
 
     function startGame(name) {
+      currentPlayerName = name;
+      
       document.getElementById("waitScreen").style.display = "none";
       document.getElementById("gameArea").style.display = "flex";
       document.getElementById("playerName").innerText = "Bem-vindo, " + name;
@@ -294,25 +384,100 @@
     }
 
     async function finishGame() {
-      clearInterval(scoreInterval);
+  clearInterval(scoreInterval);
 
-      await fetch("/api/e/{{ event.slug }}/save-score/", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          attempt_id: attemptId,
-          score: score
-        })
-      });
+  await fetch("/api/e/{{ event.slug }}/save-score/", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      attempt_id: attemptId,
+      score: score
+    })
+  });
 
-      attemptId = null;
-      code = "";
-      updateDisplay();
+  showResultScreen();
+}
 
-      document.getElementById("gameArea").style.display = "none";
-      document.getElementById("waitScreen").style.display = "grid";
-      document.getElementById("message").innerText = "Pontuação salva!";
-    }
+let countdownInterval = null;
+
+async function showResultScreen() {
+
+    document.getElementById("gameArea").style.display = "none";
+    document.getElementById("resultArea").style.display = "flex";
+
+    document.getElementById("resultPlayer").innerText = currentPlayerName;
+    document.getElementById("finalScore").innerText = score;
+
+    await loadRanking();
+
+    let seconds = 10;
+
+    const countdown = document.getElementById("countdown");
+
+    countdown.innerHTML = seconds;
+
+    clearInterval(countdownInterval);
+
+    countdownInterval = setInterval(function(){
+
+        seconds--;
+
+        countdown.innerHTML = seconds;
+
+        if(seconds <= 0){
+
+            clearInterval(countdownInterval);
+
+            resetToWaitScreen();
+
+        }
+
+    },1000);
+
+}
+
+
+async function loadRanking() {
+  const response = await fetch("/api/e/{{ event.slug }}/ranking-json/");
+  const data = await response.json();
+
+  const rankingList = document.getElementById("rankingList");
+  rankingList.innerHTML = "";
+
+  if (!data.ok || data.ranking.length === 0) {
+    rankingList.innerHTML = "<p>Nenhuma pontuação registrada ainda.</p>";
+    return;
+  }
+
+  data.ranking.forEach((item, index) => {
+    const div = document.createElement("div");
+    div.className = "ranking-item";
+
+    div.innerHTML = `
+      <div class="pos">#${index + 1}</div>
+      <div class="name">${item.player}</div>
+      <div class="score">${item.score}</div>
+    `;
+
+    rankingList.appendChild(div);
+  });
+}
+
+
+function resetToWaitScreen() {
+  attemptId = null;
+  code = "";
+  score = 0;
+  currentPlayerName = "";
+
+  updateDisplay();
+
+  document.getElementById("resultArea").style.display = "none";
+  document.getElementById("waitScreen").style.display = "grid";
+  document.getElementById("message").innerText = "Digite seu código para jogar.";
+}
+
+
 
     document.addEventListener("keydown", function(event) {
       if (event.key >= "0" && event.key <= "9") addNumber(event.key);
