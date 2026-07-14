@@ -3,7 +3,7 @@ from django.db import models
 
 class Player(models.Model):
     name = models.CharField(max_length=120)
-    phone = models.CharField(max_length=30)
+    phone = models.CharField(max_length=30, unique=True)    
     neighborhood = models.CharField(max_length=80, blank=True, default="")
 
     instagram_confirmed = models.BooleanField(default=False)

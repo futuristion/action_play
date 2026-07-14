@@ -15,10 +15,16 @@ def event_register(request, event_slug):
     game = Game.objects.filter(active=True).first()
 
     if request.method == "POST":
-        player = Player.objects.create(
-            name=request.POST.get("name"),
-            phone=request.POST.get("phone", ""),
-            neighborhood=request.POST.get("neighborhood", ""),
+        phone = request.POST.get("phone", "").strip()
+        name = request.POST.get("name", "").strip()
+        neighborhood = request.POST.get("neighborhood", "").strip()
+
+        player, created = Player.objects.get_or_create(
+            phone=phone,
+            defaults={
+                "name": name,
+                "neighborhood": neighborhood,
+            }
         )
 
         attempt = Attempt.objects.create(

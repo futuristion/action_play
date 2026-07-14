@@ -55,5 +55,8 @@
 
     <a href="{% url 'event_register' event.slug %}">Gerar outro código</a>
   </div>
+  {% if attempt.player.name != request.POST.name %}
+  <p>Telefone já cadastrado. Nova tentativa gerada para:</p>
+{% endif %}
 </body>
 </html>
