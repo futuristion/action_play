@@ -73,7 +73,7 @@
       {% csrf_token %}
 
       <input type="text" name="name" placeholder="Nome" required>
-      <input type="text" name="phone" placeholder="Telefone" required>
+      <input type="tel" id="phone" name="phone" placeholder="(__) _____-____" inputmode="numeric" autocomplete="tel" maxlength="15" required>
       <input type="text" name="neighborhood" placeholder="Bairro" required>
 
       <button type="submit">GERAR CÓDIGO</button>
@@ -82,6 +82,33 @@
     <div class="small">
       Participe do desafio e concorra aos brindes da ação.
     </div>
+
+    {% if error %}
+    <div class="error-message">
+        {{ error }}
+    </div>
+{% endif %}
   </div>
+  <script>
+const phone = document.getElementById("phone");
+
+phone.addEventListener("input", function () {
+    let value = this.value.replace(/\D/g, "");
+
+    if (value.length > 11) {
+        value = value.substring(0, 11);
+    }
+
+    if (value.length > 2) {
+        value = value.replace(/^(\d{2})(\d)/, "($1) $2");
+    }
+
+    if (value.length > 7) {
+        value = value.replace(/(\d{5})(\d)/, "$1-$2");
+    }
+
+    this.value = value;
+});
+</script>
 </body>
 </html>

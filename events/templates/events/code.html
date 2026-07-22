@@ -55,8 +55,14 @@
 
     <a href="{% url 'event_register' event.slug %}">Gerar outro código</a>
   </div>
-  {% if attempt.player.name != request.POST.name %}
-  <p>Telefone já cadastrado. Nova tentativa gerada para:</p>
+  {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
 {% endif %}
 </body>
 </html>

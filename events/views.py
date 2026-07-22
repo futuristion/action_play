@@ -8,6 +8,8 @@ import json
 import qrcode
 import base64
 from io import BytesIO
+import re
+from django.contrib import messages
 
 
 def event_register(request, event_slug):
@@ -15,16 +17,35 @@ def event_register(request, event_slug):
     game = Game.objects.filter(active=True).first()
 
     if request.method == "POST":
-        phone = request.POST.get("phone", "").strip()
+        phone = re.sub(r"\D", "", request.POST.get("phone", ""))
         name = request.POST.get("name", "").strip()
         neighborhood = request.POST.get("neighborhood", "").strip()
 
-        player, created = Player.objects.get_or_create(
+        # Validação do telefone
+        if len(phone) != 11:
+            return render(request, "events/register.html", {
+                "event": event,
+                "error": "Informe um telefone válido com DDD.",
+            })
+
+        # Verifica se o telefone já está cadastrado
+        existing_player = Player.objects.filter(phone=phone).first()
+
+        if existing_player:
+            return render(request, "events/register.html", {
+                "event": event,
+                "error": (
+                    f"Este telefone já está cadastrado para "
+                    f"{existing_player.name}. Procure o promotor "
+                    "para liberar uma nova tentativa."
+                ),
+            })
+
+        # Só cria jogador quando o telefone é novo
+        player = Player.objects.create(
             phone=phone,
-            defaults={
-                "name": name,
-                "neighborhood": neighborhood,
-            }
+            name=name,
+            neighborhood=neighborhood,
         )
 
         attempt = Attempt.objects.create(
@@ -35,7 +56,11 @@ def event_register(request, event_slug):
             reason="initial",
         )
 
-        return redirect("code_screen", event_slug=event.slug, attempt_id=attempt.id)
+        return redirect(
+            "code_screen",
+            event_slug=event.slug,
+            attempt_id=attempt.id,
+        )
 
     return render(request, "events/register.html", {
         "event": event,
