@@ -61,6 +61,7 @@ def event_register(request, event_slug):
             event_slug=event.slug,
             attempt_id=attempt.id,
         )
+    
 
     return render(request, "events/register.html", {
         "event": event,
