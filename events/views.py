@@ -121,6 +121,7 @@ def validate_code(request, event_slug):
             "ok": True,
             "attempt_id": attempt.id,
             "player_name": attempt.player.name,
+            "event_slug": event.slug,
         })
 
     except Attempt.DoesNotExist:

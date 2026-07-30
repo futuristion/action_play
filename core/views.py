@@ -1,7 +1,20 @@
 from django.shortcuts import render
-from django.shortcuts import redirect
+
+from events.models import Event
 
 
 def home(request):
-    return redirect("event_register", event_slug="cafe-terra-brasil")
+    events = (
+        Event.objects
+        .filter(active=True)
+        .select_related("brand")
+        .order_by("-created_at")
+    )
 
+    return render(
+        request,
+        "core/home.html",
+        {
+            "events": events,
+        },
+    )

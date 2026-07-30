@@ -1,39 +1,85 @@
-ActionPlay = {
-
+const ActionPlay = {
     attemptId: null,
-
     playerName: "",
+    eventSlug: "",
 
-    start(data){
+    start(data) {
+        if (!data || !data.attempt_id || !data.event_slug) {
+            console.error(
+                "Action Play: dados inválidos para iniciar a partida.",
+                data
+            );
+
+            return false;
+        }
 
         this.attemptId = data.attempt_id;
+        this.playerName = data.player_name || "";
+        this.eventSlug = data.event_slug;
 
-        this.playerName = data.player_name;
-
+        return true;
     },
 
-    finish(score){
+    async finish(score) {
+        if (!this.attemptId || !this.eventSlug) {
+            console.error(
+                "Action Play: tentativa ou evento não inicializado."
+            );
 
-        fetch("/api/e/cafe-terra-brasil/save-score/",{
+            return {
+                ok: false,
+                error: "Partida não inicializada.",
+            };
+        }
 
-            method:"POST",
+        const numericScore = Number(score);
 
-            headers:{
+        if (!Number.isFinite(numericScore) || numericScore < 0) {
+            console.error(
+                "Action Play: pontuação inválida.",
+                score
+            );
 
-                "Content-Type":"application/json"
+            return {
+                ok: false,
+                error: "Pontuação inválida.",
+            };
+        }
 
-            },
+        try {
+            const response = await fetch(
+                `/api/e/${encodeURIComponent(this.eventSlug)}/save-score/`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        attempt_id: this.attemptId,
+                        score: Math.floor(numericScore),
+                    }),
+                }
+            );
 
-            body:JSON.stringify({
+            const data = await response.json();
 
-                attempt_id:this.attemptId,
+            if (!response.ok || !data.ok) {
+                throw new Error(
+                    data.error || "Não foi possível salvar a pontuação."
+                );
+            }
 
-                score:score
+            return data;
+        } catch (error) {
+            console.error(
+                "Action Play: erro ao salvar pontuação.",
+                error
+            );
 
-            })
-
-        });
-
-    }
-
-}
+            return {
+                ok: false,
+                error: error.message,
+            };
+        }
+    },
+};
